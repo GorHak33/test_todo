@@ -21,7 +21,7 @@ export const loadTrashFromLocalStorage = (): Todo[] => {
     }
     return JSON.parse(serializedState);
   } catch (error) {
-    console.error("Failed to load todos from localStorage", error);
+    console.error("Failed to load trash from localStorage", error);
     return [];
   }
 };
@@ -35,22 +35,22 @@ export const saveTodosToLocalStorage = (todos: Todo[]): void => {
   }
 };
 
+export const saveTrashToLocalStorage = (trash: Todo[]): void => {
+  try {
+    const serializedState = JSON.stringify(trash);
+    localStorage.setItem("trash", serializedState);
+  } catch (error) {
+    console.error("Failed to save trash to localStorage", error);
+  }
+};
+
 export const deleteTodoFromLocalStorage = (id: string): void => {
   try {
     const todosData = localStorage.getItem("todos");
     if (todosData) {
       const todos = JSON.parse(todosData) as Todo[];
-      const deletedTodo = todos.find(todo => todo.id === id);
-
-      if (deletedTodo) {
-        const updatedTodos = todos.filter(todo => todo.id !== id);
-        localStorage.setItem("todos", JSON.stringify(updatedTodos));
-
-        const trashData = localStorage.getItem("trash") || "[]";
-        const trash = JSON.parse(trashData) as Todo[];
-        const updatedTrash = [...trash, deletedTodo];
-        localStorage.setItem("trash", JSON.stringify(updatedTrash));
-      }
+      const updatedTodos = todos.filter(todo => todo.id !== id);
+      localStorage.setItem("todos", JSON.stringify(updatedTodos));
     }
   } catch (error) {
     console.error(
@@ -59,13 +59,19 @@ export const deleteTodoFromLocalStorage = (id: string): void => {
     );
   }
 };
-export const deleteTrashFromLocalStorage = (id: string) => {
-  const deletedTodosFromLocal = localStorage.getItem("trash");
-  if (deletedTodosFromLocal) {
-    const deletedTodosParsed = JSON.parse(deletedTodosFromLocal);
-    const updatedTodos = deletedTodosParsed.filter(
-      (todo: Todo) => todo.id !== id
+
+export const deleteTrashFromLocalStorage = (id: string): void => {
+  try {
+    const trashData = localStorage.getItem("trash");
+    if (trashData) {
+      const trash = JSON.parse(trashData) as Todo[];
+      const updatedTrash = trash.filter(todo => todo.id !== id);
+      localStorage.setItem("trash", JSON.stringify(updatedTrash));
+    }
+  } catch (error) {
+    console.error(
+      `Failed to delete trash with ID ${id} from local storage:`,
+      error
     );
-    localStorage.setItem("trash", JSON.stringify(updatedTodos));
   }
 };

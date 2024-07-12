@@ -20,6 +20,7 @@ import {
 
 import { Todo } from "../../types";
 import { Formik, Form, Field } from "formik";
+import { deleteTodoFromLocalStorage } from "../../helpers/localStorage";
 
 const TodoList: React.FC = () => {
   const todos = useSelector((state: any) => state.todo.todos);
@@ -60,6 +61,7 @@ const TodoList: React.FC = () => {
   };
   const handleDelete = (id: string) => {
     dispatch(deleteTodo(id));
+    // deleteTodoFromLocalStorage(id);
   };
   const handleFieldChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,

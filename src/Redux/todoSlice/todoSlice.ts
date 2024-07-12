@@ -6,12 +6,14 @@ import {
   loadTodosFromLocalStorage,
   loadTrashFromLocalStorage,
   saveTodosToLocalStorage,
+  saveTrashToLocalStorage,
 } from "../../helpers/localStorage";
 
 const initialState: TodoState = {
   todos: loadTodosFromLocalStorage() || [],
-  deletedTodos: loadTrashFromLocalStorage(),
+  deletedTodos: loadTrashFromLocalStorage() || [],
 };
+
 const toggleStatus = (status: string): string => {
   return status === "Completed" ? "Pending" : "Completed";
 };
@@ -23,7 +25,6 @@ const todoSlice = createSlice({
     addTodo: (state, action: PayloadAction<Todo>) => {
       state.todos.push(action.payload);
       saveTodosToLocalStorage(state.todos);
-      return state;
     },
     deleteTodo: (state, action: PayloadAction<string>) => {
       const deletedTodo = state.todos.find(todo => todo.id === action.payload);
@@ -31,10 +32,9 @@ const todoSlice = createSlice({
         state.todos = state.todos.filter(todo => todo.id !== action.payload);
         deletedTodo.status = "Removed";
         state.deletedTodos.push(deletedTodo);
+        saveTodosToLocalStorage(state.todos);
+        saveTrashToLocalStorage(state.deletedTodos);
       }
-
-      saveTodosToLocalStorage(state.deletedTodos);
-      deleteTodoFromLocalStorage(action.payload);
     },
     markAsComplete: (state, action: PayloadAction<string>) => {
       const todo = state.todos.find(todo => todo.id === action.payload);
@@ -56,7 +56,6 @@ const todoSlice = createSlice({
       });
       saveTodosToLocalStorage(state.todos);
     },
-
     editTodo: (state, action: PayloadAction<Todo>) => {
       const editedTodo = action.payload;
       state.todos = state.todos.map(task =>
@@ -64,14 +63,13 @@ const todoSlice = createSlice({
       );
       saveTodosToLocalStorage(state.todos);
     },
-
     removeDeletedTodo: (state, action: PayloadAction<string>) => {
       state.deletedTodos = state.deletedTodos.filter(
         todo => todo.id !== action.payload
       );
       deleteTrashFromLocalStorage(action.payload);
+      saveTrashToLocalStorage(state.deletedTodos);
     },
-
     restoreTodo: (state, action: PayloadAction<string>) => {
       const restoredTodo = state.deletedTodos.find(
         todo => todo.id === action.payload
@@ -82,9 +80,9 @@ const todoSlice = createSlice({
         );
         restoredTodo.status = "Pending";
         state.todos.push(restoredTodo);
+        saveTodosToLocalStorage(state.todos);
+        saveTrashToLocalStorage(state.deletedTodos);
       }
-      saveTodosToLocalStorage(state.todos);
-      saveTodosToLocalStorage(state.deletedTodos);
     },
   },
 });
@@ -98,4 +96,5 @@ export const {
   removeDeletedTodo,
   restoreTodo,
 } = todoSlice.actions;
+
 export default todoSlice.reducer;
